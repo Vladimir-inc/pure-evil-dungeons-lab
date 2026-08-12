@@ -1,0 +1,40 @@
+// Pure Evil design tokens. Cool near-black base (the File Manager family), infernal ember accent.
+// Declared through a mixin rather than on :root, so they are scoped to the window - and can be
+// pulled into the launcher button, which lives outside the app's DOM.
+
+.pure-evil-tokens() {
+  // surfaces
+  --pe-bg: #0b0d10;
+  --pe-bg-deep: #07080a;
+  --pe-panel: #14171c;
+  --pe-panel-alt: #12151a;
+  --pe-raised: #1c2129;
+  --pe-sunken: #0e1116;
+  --pe-border-faint: #1b202a;
+  --pe-border: #262c35;
+  --pe-border-strong: #323a46;
+
+  // text
+  --pe-text: #e6e9ee;
+  --pe-text-dim: #9aa4b2;
+  --pe-text-faint: #6b7684;
+  --pe-text-on-ember: #14171c;
+
+  // infernal accent
+  --pe-ember: #e2432a;
+  --pe-ember-bright: #ff6a45;
+  --pe-ember-deep: #b8331d;
+  --pe-ember-border: #a32c18;
+  --pe-ember-glow: rgba(226, 67, 42, 0.4);
+  --pe-gradient-ember: linear-gradient(180deg, var(--pe-ember-bright), var(--pe-ember));
+
+  // danger, a distinct hue so "armed" and "destructive" never read as the same colour
+  --pe-blood-bright: #d9455f;
+
+  --pe-radius: 9px;
+  --pe-radius-sm: 7px;
+  --pe-glow-sm: 0 0 12px var(--pe-ember-glow);
+
+  --pe-font-ui: "Signika", sans-serif;
+  --pe-font-mono: monospace;
+}

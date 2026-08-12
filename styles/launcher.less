@@ -1,0 +1,30 @@
+// The demon button sits in #chat-controls, outside the app window, so this is the one place the
+// token mixin is called outside the .pure-evil scope.
+body .pe-launcher {
+  .pure-evil-tokens();
+
+  color: var(--pe-text-faint);
+  transition:
+    color 0.15s ease,
+    text-shadow 0.15s ease;
+
+  &:hover {
+    color: var(--pe-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--pe-ember-bright);
+    outline-offset: 2px;
+  }
+
+  // A still glow costs nothing; a looping one costs a compositor pass forever. Armed is a state,
+  // not an animation.
+  &.pe-armed {
+    color: var(--pe-ember-bright);
+    text-shadow: 0 0 6px var(--pe-ember-glow);
+
+    &:hover {
+      text-shadow: 0 0 9px var(--pe-ember-glow);
+    }
+  }
+}

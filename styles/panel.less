@@ -1,0 +1,1041 @@
+.pure-evil {
+  .pe-window-content {
+    .pure-evil-tokens();
+
+    display: grid;
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: 100%;
+    padding: 0;
+    background: var(--pe-panel);
+    color: var(--pe-text);
+    font-family: var(--pe-font-ui);
+    font-size: 13px;
+  }
+
+  .pe-roster {
+    grid-row: 1;
+    grid-column: 1;
+    overflow-y: auto;
+    border-right: 1px solid var(--pe-border);
+    padding: 6px 0;
+  }
+
+  .pe-panel {
+    grid-row: 1;
+    grid-column: 2;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pe-footer {
+    grid-row: 2;
+    grid-column: 1 / -1;
+  }
+
+  /* ---------------------------------------------- */
+  /*  Toggle - one geometry, two sizes              */
+  /* ---------------------------------------------- */
+
+  // Knob diameter and travel are DERIVED from the track, never hand-picked pixels, so the two
+  // sizes cannot drift apart.
+  .pe-toggle-geometry(@track, @height) {
+    box-sizing: border-box;
+    position: relative;
+    width: @track;
+    height: @height;
+    min-height: @height; // Foundry forces min-height: var(--input-height) onto buttons
+    flex: none;
+    padding: 0;
+    border: 1px solid var(--pe-border-strong);
+    border-radius: 999px;
+    cursor: pointer;
+    background: var(--pe-sunken);
+    transition:
+      background 0.3s ease,
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+
+    &:focus-visible {
+      outline: 2px solid var(--pe-ember-bright);
+      outline-offset: 2px;
+    }
+
+    &.pe-on {
+      background: var(--pe-gradient-ember);
+      border-color: var(--pe-ember-border);
+      box-shadow: var(--pe-glow-sm);
+    }
+
+    .pe-toggle-thumb {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      aspect-ratio: 1; // an oval knob is structurally impossible
+      width: auto;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--pe-text-faint);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+      transition:
+        transform 0.3s ease,
+        background 0.3s ease;
+    }
+
+    &:active .pe-toggle-thumb {
+      transform: scale(0.88);
+      transition-duration: 0.12s;
+    }
+
+    // travel = track minus its own width, minus the two 1px borders
+    &.pe-on .pe-toggle-thumb {
+      transform: translateX(calc(@track - 2px - 100%));
+      background: var(--pe-bg-deep);
+    }
+
+    &.pe-on:active .pe-toggle-thumb {
+      transform: translateX(calc(@track - 2px - 100%)) scale(0.88);
+    }
+
+    .pe-toggle-dot {
+      width: 30%;
+      height: 30%;
+      border-radius: 50%;
+      background: var(--pe-border-strong);
+      transition: background 0.3s ease;
+    }
+
+    &.pe-on .pe-toggle-dot {
+      background: var(--pe-ember);
+    }
+  }
+
+  .pe-toggle {
+    .pe-toggle-geometry(46px, 28px);
+  }
+
+  .pe-toggle-sm {
+    .pe-toggle-geometry(34px, 20px);
+  }
+
+  /* ---------------------------------------------- */
+  /*  Roster                                        */
+  /* ---------------------------------------------- */
+
+  .pe-actor-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    border-radius: 0 var(--pe-radius-sm) var(--pe-radius-sm) 0;
+
+    &:hover {
+      background: var(--pe-raised);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--pe-ember-bright);
+      outline-offset: -2px;
+    }
+
+    &.is-selected {
+      background: var(--pe-panel-alt);
+      border-left-color: var(--pe-ember);
+    }
+
+    // currently bending rolls; selection is the stronger, momentary state and wins
+    &.is-armed:not(.is-selected) {
+      border-left-color: var(--pe-ember-deep);
+    }
+
+    // configured but switched off: dim it, do not hide it - the GM still needs to read the row
+    &.is-off {
+      opacity: 0.55;
+
+      .pe-actor-portrait {
+        filter: grayscale(0.6);
+      }
+    }
+  }
+
+  .pe-actor-portrait {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: none;
+    border: 1px solid var(--pe-border-strong);
+  }
+
+  .pe-actor-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .pe-actor-name {
+    color: var(--pe-text);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pe-actor-player {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--pe-text-faint);
+    font-size: 11.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pe-color-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .pe-gm-tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--pe-text-faint);
+    border: 1px solid var(--pe-border-strong);
+    border-radius: 4px;
+    padding: 0 3px;
+  }
+
+  .pe-actor-pips {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: none;
+  }
+
+  .pe-pip {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    color: var(--pe-border-strong);
+    font-size: 10px;
+
+    &.is-active {
+      color: var(--pe-ember-bright);
+    }
+  }
+
+  .pe-count-badge {
+    font: 600 11px/1 var(--pe-font-mono);
+    color: var(--pe-text-on-ember);
+    background: var(--pe-ember);
+    border-radius: 999px;
+    padding: 4px 7px;
+  }
+
+  /* ---------------------------------------------- */
+  /*  Panel                                         */
+  /* ---------------------------------------------- */
+
+  .pe-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--pe-border);
+    flex: none;
+  }
+
+  .pe-panel-portrait {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: none;
+    border: 1px solid var(--pe-border-strong);
+  }
+
+  .pe-panel-title {
+    font-weight: 700;
+    font-size: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pe-panel-off-banner {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: var(--pe-text-faint);
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: var(--pe-sunken);
+    border: 1px solid var(--pe-border);
+  }
+
+  .pe-tabs {
+    flex: none;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    padding: 8px 12px 0;
+    border-bottom: 1px solid var(--pe-border);
+    background: var(--pe-panel-alt);
+  }
+
+  .pe-tab {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--pe-text-dim);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 8px 8px 0 0;
+    padding: 8px 14px;
+    margin-bottom: -1px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    width: auto;
+
+    &:hover {
+      color: var(--pe-ember-bright);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--pe-ember-bright);
+      outline-offset: -2px;
+    }
+
+    &.is-active {
+      color: var(--pe-ember-bright);
+      background: var(--pe-panel);
+      border-color: var(--pe-border);
+      border-bottom-color: var(--pe-panel);
+    }
+  }
+
+  .pe-die-row {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--pe-border);
+    min-width: 0;
+  }
+
+  /* ---------------------------------------------- */
+  /*  Die rail - one segmented control, not N chips */
+  /* ---------------------------------------------- */
+
+  .pe-die-rail {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    padding: 3px;
+    border: 1px solid var(--pe-border);
+    border-radius: var(--pe-radius);
+    background: var(--pe-sunken);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45);
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      height: 0;
+    }
+  }
+
+  .pe-seg-grid {
+    position: relative;
+    min-width: max-content;
+  }
+
+  .pe-seg-labels {
+    display: grid;
+    grid-template-columns: repeat(var(--pe-seg-count), minmax(46px, 1fr));
+
+    > span {
+      padding: 5px 10px;
+      text-align: center;
+      white-space: nowrap;
+      font: 600 12px/18px var(--pe-font-ui);
+      color: var(--pe-text-dim);
+    }
+  }
+
+  // the thumb clips a second, full-width copy of the labels drawn in the inverted colour, so the
+  // label it covers recolours by the thumb's own movement - nothing to keep in sync
+  .pe-seg-thumb {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: calc(100% / var(--pe-seg-count));
+    transform: translateX(calc(var(--pe-seg-index) * 100%));
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--pe-gradient-ember);
+    box-shadow: var(--pe-glow-sm);
+    pointer-events: none;
+    transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .pe-seg-thumb-inner {
+    position: absolute;
+    inset: 0;
+    transform: translateX(calc(var(--pe-seg-index) * -100%));
+    transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+
+    .pe-seg-labels {
+      width: calc(var(--pe-seg-count) * 100%);
+
+      > span {
+        color: var(--pe-text-on-ember);
+        font-weight: 700;
+      }
+    }
+  }
+
+  .pe-seg-hits {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--pe-seg-count), minmax(46px, 1fr));
+
+    > button {
+      min-height: 0;
+      width: auto;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      background: none;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      &[aria-checked="true"]:hover {
+        background: none;
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--pe-ember-bright);
+        outline-offset: -2px;
+      }
+    }
+  }
+
+  .pe-die-add {
+    flex: none;
+  }
+
+  .pe-panel-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    &.is-dimmed {
+      opacity: 0.6; // still editable, visibly inactive
+    }
+  }
+
+  /* ---------------------------------------------- */
+  /*  Chips, buttons                                */
+  /* ---------------------------------------------- */
+
+  .pe-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 26px;
+    width: auto;
+    min-height: 0;
+    padding: 0 11px;
+    border: 1px solid var(--pe-border-strong);
+    border-radius: 999px;
+    background: var(--pe-panel-alt);
+    color: var(--pe-text-dim);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+      background: var(--pe-raised);
+      color: var(--pe-text);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--pe-ember-bright);
+      outline-offset: 2px;
+    }
+
+    &.is-selected {
+      background: var(--pe-gradient-ember);
+      border-color: var(--pe-ember-border);
+      color: var(--pe-text-on-ember);
+      box-shadow: var(--pe-glow-sm);
+    }
+  }
+
+  .pe-chip-static {
+    cursor: default;
+    height: 20px;
+    padding: 0 8px;
+    font-size: 10.5px;
+
+    &:hover {
+      background: var(--pe-panel-alt);
+      color: var(--pe-text-dim);
+    }
+  }
+
+  .pe-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    width: auto;
+    min-height: 0;
+    padding: 0 12px;
+    border: 1px solid var(--pe-border-strong);
+    border-radius: var(--pe-radius-sm);
+    background: var(--pe-panel-alt);
+    color: var(--pe-text-dim);
+    font: 600 13px var(--pe-font-ui);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--pe-raised);
+      color: var(--pe-text);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--pe-ember-bright);
+      outline-offset: 2px;
+    }
+  }
+
+  .pe-btn-accent {
+    background: var(--pe-gradient-ember);
+    border-color: var(--pe-ember-border);
+    color: var(--pe-text-on-ember);
+    font-weight: 700;
+
+    &:hover {
+      background: var(--pe-gradient-ember);
+      color: var(--pe-text-on-ember);
+      filter: brightness(1.15);
+    }
+  }
+
+  .pe-icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    min-height: 0;
+    flex: none;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--pe-text-dim);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--pe-border);
+      color: var(--pe-text);
+    }
+
+    &.is-danger:hover {
+      color: var(--pe-blood-bright);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--pe-ember-bright);
+      outline-offset: 1px;
+    }
+  }
+
+  /* ---------------------------------------------- */
+  /*  Probabilities                                 */
+  /* ---------------------------------------------- */
+
+  .pe-weights-toolbar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  // ponytail: no virtualized list. WEIGHTS_MAX_FACES caps this at 100 plain rows, which Electron
+  // does not care about; add virtualization only if that cap is ever raised well past 100.
+  .pe-faces {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    padding: 4px 12px 10px;
+  }
+
+  .pe-face-row {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 60px 52px;
+    align-items: center;
+    gap: 10px;
+    height: 30px;
+    border-radius: 6px;
+    padding: 0 6px;
+
+    &:hover {
+      background: var(--pe-raised);
+    }
+
+    &.pe-muted {
+      .pe-face-value,
+      .pe-chance {
+        color: var(--pe-text-faint);
+      }
+    }
+
+    &.pe-boosted .pe-chance {
+      color: var(--pe-ember-bright);
+      font-weight: 700;
+    }
+  }
+
+  .pe-face-value {
+    font: 600 12px var(--pe-font-mono);
+    color: var(--pe-text);
+    text-align: right;
+  }
+
+  .pe-chance {
+    font: 600 11px var(--pe-font-mono);
+    color: var(--pe-text-dim);
+    text-align: right;
+  }
+
+  .pe-face-number {
+    width: 60px;
+    height: 22px;
+    background: var(--pe-sunken);
+    border: 1px solid var(--pe-border);
+    border-radius: var(--pe-radius-sm);
+    color: var(--pe-text);
+    font: 600 11px var(--pe-font-mono);
+    text-align: center;
+
+    &:focus-visible {
+      outline: 2px solid var(--pe-ember-bright);
+      outline-offset: 1px;
+    }
+  }
+
+  // native range, themed through Foundry's own Theme V2 variables - no custom slider widget.
+  // --pe-fill is written per row, so the bar and the number are one value shown twice.
+  input[type="range"] {
+    --range-track-color: linear-gradient(
+      90deg,
+      var(--pe-ember) 0 var(--pe-fill, 10%),
+      var(--pe-sunken) var(--pe-fill, 10%) 100%
+    );
+    --range-track-border-color: var(--pe-border);
+    --range-thumb-background-color: var(--pe-ember-bright);
+    --range-thumb-border-color: var(--pe-ember-border);
+  }
+
+  /* ---------------------------------------------- */
+  /*  Forced rolls                                  */
+  /* ---------------------------------------------- */
+
+  .pe-force-composer {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--pe-text-faint);
+      font-size: 11.5px;
+      white-space: nowrap;
+    }
+  }
+
+  .pe-select,
+  .pe-number-input {
+    height: 32px;
+    background: var(--pe-sunken);
+    border: 1px solid var(--pe-border);
+    border-radius: var(--pe-radius-sm);
+    color: var(--pe-text);
+    font: 600 12px var(--pe-font-mono);
+    text-align: center;
+
+    &:focus-visible {
+      outline: 2px solid var(--pe-ember-bright);
+      outline-offset: 1px;
+    }
+  }
+
+  .pe-select {
+    width: 90px;
+  }
+
+  .pe-number-input {
+    width: 64px;
+  }
+
+  .pe-queue {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 4px 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .pe-queue-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    flex: none;
+    padding: 0 8px;
+    background: var(--pe-panel-alt);
+    border: 1px solid var(--pe-border);
+    border-radius: var(--pe-radius-sm);
+
+    &:hover {
+      border-color: var(--pe-border-strong);
+    }
+  }
+
+  .pe-queue-value {
+    font: 700 13px var(--pe-font-mono);
+  }
+
+  .pe-queue-remaining {
+    color: var(--pe-text-faint);
+    font-size: 11.5px;
+    margin-left: auto;
+  }
+
+  /* ---------------------------------------------- */
+  /*  Footer, empty states                          */
+  /* ---------------------------------------------- */
+
+  .pe-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 42px;
+    padding: 0 14px;
+    background: var(--pe-panel-alt);
+    border-top: 1px solid var(--pe-border);
+    flex: none;
+  }
+
+  .pe-footer-label {
+    color: var(--pe-text-dim);
+    font-size: 12px;
+  }
+
+  .pe-footer-spacer {
+    flex: 1;
+  }
+
+  .pe-footer-sep {
+    width: 1px;
+    height: 16px;
+    background: var(--pe-border-strong);
+  }
+
+  .pe-gm-portrait {
+    display: grid;
+    place-items: center;
+    background: var(--pe-sunken);
+    color: var(--pe-ember);
+    font-size: 16px;
+  }
+
+  .pe-actor-row.is-gm-subject {
+    border-bottom: 1px solid var(--pe-border);
+    margin-bottom: 4px;
+    padding-bottom: 10px;
+  }
+
+  .pe-footer-fire {
+    color: var(--pe-ember);
+  }
+
+  .pe-footer-subject {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 220px;
+  }
+
+  /* ---------------------------------------------- */
+  /*  Ko-fi kitten, rotating phrase, Discord        */
+  /* ---------------------------------------------- */
+
+  .pe-phrase {
+    color: var(--pe-text-faint);
+    font-size: 11.5px;
+    font-style: italic;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 40ch;
+
+    &:hover {
+      color: var(--pe-ember-bright);
+    }
+  }
+
+  .pe-discord {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 24px;
+    flex: none;
+    border-radius: 999px;
+    color: var(--pe-text-faint);
+    text-decoration: none;
+
+    &:hover {
+      color: #7189da;
+      text-shadow: 0 0 8px rgba(113, 137, 218, 0.5);
+    }
+  }
+
+  .pe-kofi-wrap {
+    position: relative;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    flex: none;
+
+    .pe-kofi {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 24px;
+      padding: 0 10px;
+      flex: none;
+      border: 1px solid var(--pe-border-strong);
+      border-radius: 999px;
+      background: var(--pe-panel);
+      color: var(--pe-text-faint);
+      font-size: 11.5px;
+      line-height: 1;
+      text-decoration: none;
+
+      svg {
+        width: 14px;
+        height: 14px;
+        flex: none;
+      }
+
+      &:hover {
+        border-color: #ff5e5b;
+        color: #ff5e5b;
+      }
+    }
+
+    .pe-kofi-peek {
+      position: absolute;
+      left: 50%;
+      bottom: 100%;
+      transform: translateX(-50%);
+      width: 92px;
+      height: 60px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .pe-kofi-cat,
+    .pe-kofi-paws {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      margin-left: -28px;
+    }
+
+    .pe-kofi-cat {
+      transform: translateY(112%);
+      transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0s;
+    }
+
+    .pe-kofi-cat-wiggle {
+      transform-origin: 50% 100%;
+    }
+
+    .pe-cat-eye {
+      transition: ry 0.3s;
+    }
+
+    .pe-kofi-paws {
+      // лапки появляются первыми, а прячутся последними - задержки меняются на hover
+      transform: translateY(120%);
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.45s;
+    }
+
+    .pe-kofi-heart {
+      position: absolute;
+      opacity: 0;
+      transform: scale(0.3) rotate(var(--rot));
+      transition:
+        opacity 0.9s ease 0s,
+        transform 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0s;
+
+      &.h1 {
+        left: 8px;
+        bottom: 30px;
+        --rot: -14deg;
+      }
+
+      &.h2 {
+        left: 70px;
+        bottom: 36px;
+        --rot: 12deg;
+      }
+
+      &.h3 {
+        left: 62px;
+        bottom: 14px;
+        --rot: 20deg;
+      }
+
+      &.h4 {
+        left: 16px;
+        bottom: 10px;
+        --rot: -22deg;
+      }
+    }
+
+    &:hover {
+      .pe-kofi-cat {
+        transform: translateY(0);
+        transition-delay: 0.4s;
+      }
+
+      .pe-kofi-cat-wiggle {
+        animation: peCatWiggle 3.2s ease-in-out 1.4s infinite;
+      }
+
+      .pe-cat-eye {
+        ry: 3.4px;
+      }
+
+      .pe-kofi-paws {
+        transform: translateY(0);
+        transition-delay: 0s;
+      }
+
+      .pe-kofi-heart {
+        opacity: 0.9;
+        transform: scale(1) rotate(var(--rot));
+
+        svg {
+          animation: peCatWiggle 3.4s ease-in-out infinite;
+        }
+
+        &.h1 {
+          transition-delay: 0.85s;
+        }
+
+        &.h2 {
+          transition-delay: 1.05s;
+
+          svg {
+            animation-duration: 3.8s;
+          }
+        }
+
+        &.h3 {
+          transition-delay: 1.25s;
+
+          svg {
+            animation-duration: 3s;
+          }
+        }
+
+        &.h4 {
+          transition-delay: 1.4s;
+
+          svg {
+            animation-duration: 3.6s;
+          }
+        }
+      }
+    }
+  }
+
+  .pe-empty {
+    height: 100%;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--pe-text-faint);
+    text-align: center;
+    padding: 0 24px;
+
+    i {
+      font-size: 40px;
+      color: var(--pe-border-strong);
+    }
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--pe-text-dim);
+    }
+  }
+
+  .pe-empty-compact {
+    min-height: 100px;
+
+    i {
+      font-size: 24px;
+    }
+  }
+}
+
+@keyframes peCatWiggle {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+
+  50% {
+    transform: rotate(2.5deg);
+  }
+}

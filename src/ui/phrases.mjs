@@ -1,0 +1,66 @@
+export const DISCORD_URL = "https://discord.gg/MUxsQCf587";
+export const KOFI_URL = "https://ko-fi.com/dungeonslab";
+
+export const PHRASES = {
+  ru: [
+    "Кубы не врут. Врёте вы. Мы поможем.",
+    "Нат 20 по расписанию - это не читерство, это драматургия.",
+    "Игроки никогда не узнают. Мы тоже никому не скажем.",
+    "Нашёл баг? Расскажи нам в Дискорде.",
+    "Хочешь больше модулей? Загляни в наш Дискорд.",
+    "Все обновления и релизы - в нашем Дискорде.",
+    "Идея для фичи? Пиши напрямую разработчику в Дискорде.",
+    "Присоединяйся к сотням мастеров в нашем Дискорде.",
+    "Совесть мастера - настраиваемый параметр.",
+    "Единица на спасброске - иногда это просто хороший сюжет.",
+    "Вероятность - это рекомендация, а не закон.",
+    "Дьявол в деталях. И в вашей таблице вероятностей.",
+    "Честный бросок - когда мастер не успел открыть это окно.",
+    "Тот самый крит в финале босса? Ну надо же, совпадение.",
+    "Голосуй за следующий модуль в нашем Дискорде.",
+    "Создано Dungeons Lab. Со злым умыслом.",
+    "Rocks fall. Everyone rolls a 1.",
+    "Танк выжил на одном хите? Чистая случайность, конечно.",
+    "99 багов в коде, один пофиксили - осталось 98.",
+    "Мы тоже иногда теряем токены. Заходи, поплачем вместе.",
+    "Ищешь единомышленников для игры? Начни с нашего Дискорда.",
+    "Твой отзыв делает нас лучше. Пиши в Дискорде.",
+    "Каждый нат 20 заслужен. Просто некоторые - чуть больше.",
+    "Помни: с большой силой приходит очень довольный стол.",
+    "Даже личу нужен перерыв на кофе.",
+    "Ko-fi - это как зелье лечения, только для разработчика.",
+  ],
+  en: [
+    "The dice never lie. You do. We just help.",
+    "A nat 20 on schedule is not cheating, it is dramaturgy.",
+    "Your players will never know. Neither will we.",
+    "Found a bug? Tell us on Discord.",
+    "Want more modules? Come see us on Discord.",
+    "Every update and release lands on Discord first.",
+    "Got a feature idea? Tell the dev directly on Discord.",
+    "Join hundreds of GMs in our Discord.",
+    "A GM's conscience is a configurable setting.",
+    "A 1 on that save? Sometimes that is just good story.",
+    "Probability is a suggestion, not a law.",
+    "The devil is in the details. And in your weight table.",
+    "An honest roll is one the GM did not get to in time.",
+    "That crit on the boss's last hit point? What are the odds.",
+    "Vote on the next module in our Discord.",
+    "Made by Dungeons Lab. With malice.",
+    "Rocks fall. Everyone rolls a 1.",
+    "The tank survived on one hit point? Pure chance, obviously.",
+    "99 bugs in the code, fixed one, 98 left.",
+    "We also lose tokens sometimes. Come commiserate.",
+    "Looking for a group? Start in our Discord.",
+    "Your feedback shapes what we build. Tell us on Discord.",
+    "Every nat 20 is earned. Some just a little more than others.",
+    "With great power comes a very happy table.",
+    "Even liches need a coffee break.",
+    "Ko-fi is like a healing potion, but for the developer.",
+  ],
+};
+
+export function randomPhrase(lang) {
+  const list = PHRASES[lang] ?? PHRASES.en;
+  return list[Math.floor(Math.random() * list.length)];
+}

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.zip
+
+# local tooling and notes, not part of the module
+.claude/
+CLAUDE.md
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

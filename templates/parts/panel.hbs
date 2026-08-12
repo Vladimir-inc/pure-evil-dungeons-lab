@@ -1,0 +1,132 @@
+<div class="pe-panel">
+  {{#if character}}
+    <div class="pe-panel-header">
+      {{#if character.isGmSubject}}
+        <span class="pe-panel-portrait pe-gm-portrait"><i class="fa-solid fa-face-angry-horns"></i></span>
+      {{else}}
+        <img class="pe-panel-portrait" src="{{character.img}}" alt="">
+      {{/if}}
+      <div class="pe-panel-title">{{character.name}}</div>
+      {{#unless character.enabled}}
+        <div class="pe-panel-off-banner">
+          <i class="fa-solid fa-power-off"></i>{{localize "PURE_EVIL.Panel.Disabled"}}
+        </div>
+      {{/unless}}
+    </div>
+
+    <nav class="pe-tabs">
+      <button type="button" class="pe-tab {{#if isWeights}}is-active{{/if}}" data-action="switchTab" data-tab-id="weights">
+        <i class="fa-solid fa-percent"></i>{{localize "PURE_EVIL.Tabs.Weights"}}
+      </button>
+      <button type="button" class="pe-tab {{#if isForced}}is-active{{/if}}" data-action="switchTab" data-tab-id="forced">
+        <i class="fa-solid fa-dice"></i>{{localize "PURE_EVIL.Tabs.Forced"}}
+      </button>
+    </nav>
+
+    {{! one control, not a chip per die: a rail with a sliding thumb. The labels are drawn twice -
+        dim underneath, inverted inside the thumb's clip - so the thumb's own movement recolours
+        whichever label it covers, with nothing to keep in sync. }}
+    <div class="pe-die-row">
+      <div class="pe-die-rail" role="radiogroup" aria-label="{{localize "PURE_EVIL.Dice.Title"}}"
+           style="--pe-seg-count: {{diceCount}}; --pe-seg-index: {{dieIndex}}">
+        <div class="pe-seg-grid">
+          <div class="pe-seg-labels">
+            {{#each dice}}<span>{{label}}</span>{{/each}}
+          </div>
+          <div class="pe-seg-thumb" aria-hidden="true">
+            <div class="pe-seg-thumb-inner">
+              <div class="pe-seg-labels">
+                {{#each dice}}<span>{{label}}</span>{{/each}}
+              </div>
+            </div>
+          </div>
+          <div class="pe-seg-hits">
+            {{#each dice}}
+              <button type="button" role="radio" aria-checked="{{selected}}" data-action="selectDie"
+                      data-die-key="{{key}}" aria-label="{{label}}"></button>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+      <button type="button" class="pe-icon-btn pe-die-add" data-action="addDie"
+              data-tooltip="{{localize "PURE_EVIL.Dice.Add"}}" aria-label="{{localize "PURE_EVIL.Dice.Add"}}">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
+
+    <div class="pe-panel-body {{#unless character.enabled}}is-dimmed{{/unless}}">
+      {{#if isWeights}}
+        <div class="pe-weights-toolbar">
+          <button type="button" class="pe-btn" data-action="resetWeights">
+            <i class="fa-solid fa-scale-balanced"></i>{{localize "PURE_EVIL.Weights.Reset"}}
+          </button>
+        </div>
+
+        <div class="pe-faces">
+          {{#if tooManyFaces}}
+            <div class="pe-empty pe-empty-compact">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <p>{{localize "PURE_EVIL.Weights.TooMany" max=maxFaces}}</p>
+            </div>
+          {{else}}
+            {{#each rows}}
+              <div class="pe-face-row {{#if muted}}pe-muted{{/if}} {{#if boosted}}pe-boosted{{/if}}">
+                <span class="pe-face-value">{{face}}</span>
+                <input type="range" min="0" max="{{../weightMax}}" step="0.1" value="{{weight}}"
+                       data-face="{{face}}" style="--pe-fill: {{pctOfMax}}%"
+                       aria-label="{{localize "PURE_EVIL.Weights.Weight"}} {{face}}">
+                <input type="number" class="pe-face-number" min="0" max="{{../weightMax}}" step="0.1"
+                       value="{{weight}}" data-face="{{face}}"
+                       aria-label="{{localize "PURE_EVIL.Weights.Weight"}} {{face}}">
+                <span class="pe-chance">{{pctLabel}}</span>
+              </div>
+            {{/each}}
+          {{/if}}
+        </div>
+      {{else}}
+        <div class="pe-force-composer">
+          <label>
+            {{localize "PURE_EVIL.Forced.Value"}}
+            <select name="forceValue" class="pe-select">
+              {{#each faceOptions}}
+                <option value="{{this}}" {{#if @last}}selected{{/if}}>{{this}}</option>
+              {{/each}}
+            </select>
+          </label>
+          <label>
+            {{localize "PURE_EVIL.Forced.Times"}}
+            <input type="number" name="forceTimes" class="pe-number-input" min="1" max="99" value="1">
+          </label>
+          <button type="button" class="pe-btn pe-btn-accent" data-action="addForce">
+            <i class="fa-solid fa-bolt"></i>{{localize "PURE_EVIL.Forced.Add"}}
+          </button>
+        </div>
+
+        <div class="pe-queue">
+          {{#each forces}}
+            <div class="pe-queue-row">
+              <span class="pe-chip pe-chip-static">{{label}}</span>
+              <span class="pe-queue-value">{{value}}</span>
+              <span class="pe-queue-remaining">{{localize "PURE_EVIL.Forced.Remaining" remaining=remaining}}</span>
+              <button type="button" class="pe-icon-btn is-danger" data-action="deleteForce" data-force-id="{{id}}"
+                      data-tooltip="{{localize "PURE_EVIL.Forced.Delete"}}"
+                      aria-label="{{localize "PURE_EVIL.Forced.Delete"}}">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          {{else}}
+            <div class="pe-empty pe-empty-compact">
+              <i class="fa-solid fa-hourglass-half"></i>
+              <p>{{localize "PURE_EVIL.Forced.Empty"}}</p>
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
+    </div>
+  {{else}}
+    <div class="pe-empty">
+      <i class="fa-solid fa-user-slash"></i>
+      <p>{{localize "PURE_EVIL.Panel.NoCharacter"}}</p>
+    </div>
+  {{/if}}
+</div>

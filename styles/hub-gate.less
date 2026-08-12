@@ -1,0 +1,87 @@
+// Notice for a world running Pure Evil with the Hub switched off. Lives on <body>, outside the
+// app, so it calls the token mixin itself. Deliberately quiet: it explains a state, it is not
+// an alarm.
+body #pe-hub-gate {
+  .pure-evil-tokens();
+
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(7, 8, 10, 0.6);
+  font-family: var(--pe-font-ui);
+  color: var(--pe-text);
+
+  .pe-hub-gate__card {
+    max-width: 30rem;
+    padding: 1.5rem 1.75rem 1.25rem;
+    background: var(--pe-panel);
+    border: 1px solid var(--pe-border);
+    border-radius: var(--pe-radius);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  }
+
+  h2 {
+    margin: 0 0 0.6rem;
+    border: none;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--pe-text);
+  }
+
+  p {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--pe-text-dim);
+  }
+
+  .pe-hub-gate__note {
+    font-size: 0.82rem;
+    color: var(--pe-text-faint);
+  }
+
+  .pe-hub-gate__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 1.1rem;
+  }
+
+  button {
+    flex: 0 1 auto;
+    width: auto;
+    padding: 0.35rem 0.9rem;
+    background: var(--pe-raised);
+    border: 1px solid var(--pe-border-strong);
+    border-radius: var(--pe-radius-sm);
+    color: var(--pe-text);
+    font-size: 0.85rem;
+
+    &:hover {
+      border-color: var(--pe-ember-border);
+      box-shadow: none;
+    }
+
+    &.pe-hub-gate__ghost {
+      color: var(--pe-text-dim);
+    }
+
+    // "close" is the way out, not an offer - it should not compete with the two that fix things
+    &.pe-hub-gate__quiet {
+      margin-left: auto;
+      background: none;
+      border-color: transparent;
+      color: var(--pe-text-faint);
+
+      &:hover {
+        color: var(--pe-text-dim);
+        border-color: transparent;
+      }
+    }
+  }
+}

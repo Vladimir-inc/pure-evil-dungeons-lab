@@ -1,0 +1,45 @@
+<div class="pe-roster">
+  {{#each roster}}
+    <div class="pe-actor-row {{#if selected}}is-selected{{/if}} {{#unless enabled}}is-off{{/unless}} {{#if armed}}is-armed{{/if}} {{#if isGmSubject}}is-gm-subject{{/if}}"
+         data-action="selectSubject" data-subject-id="{{subjectId}}" tabindex="0">
+      {{#if isGmSubject}}
+        <span class="pe-actor-portrait pe-gm-portrait"><i class="fa-solid fa-face-angry-horns"></i></span>
+      {{else}}
+        <img class="pe-actor-portrait" src="{{img}}" alt="">
+      {{/if}}
+      <div class="pe-actor-body">
+        <div class="pe-actor-name">{{name}}</div>
+        <div class="pe-actor-player">
+          {{#if isGmSubject}}
+            {{subtitle}}
+          {{else}}
+            <span class="pe-color-dot" style="background:{{userColor}}"></span>
+            {{userName}}
+            {{#if isGM}}<span class="pe-gm-tag">GM</span>{{/if}}
+          {{/if}}
+        </div>
+      </div>
+      <div class="pe-actor-pips">
+        <span class="pe-pip {{#if biased}}is-active{{/if}}" data-tooltip="{{localize "PURE_EVIL.Pip.Bias"}}">
+          <i class="fa-solid fa-scale-unbalanced"></i>
+        </span>
+        {{#if forceCount}}
+          <span class="pe-count-badge" data-tooltip="{{localize "PURE_EVIL.Pip.Force"}}">{{forceCount}}</span>
+        {{/if}}
+      </div>
+      <button type="button" class="pe-toggle-sm {{#if enabled}}pe-on{{/if}}" data-action="toggleSubject"
+              data-subject-id="{{subjectId}}" role="switch" aria-checked="{{enabled}}"
+              data-tooltip="{{localize "PURE_EVIL.Roster.Toggle"}}"
+              aria-label="{{localize "PURE_EVIL.Roster.Toggle"}}">
+        <span class="pe-toggle-thumb"><span class="pe-toggle-dot"></span></span>
+      </button>
+    </div>
+  {{/each}}
+
+  {{#unless hasPlayers}}
+    <div class="pe-empty pe-empty-compact">
+      <i class="fa-solid fa-user-slash"></i>
+      <p>{{localize "PURE_EVIL.Roster.Empty"}}</p>
+    </div>
+  {{/unless}}
+</div>
