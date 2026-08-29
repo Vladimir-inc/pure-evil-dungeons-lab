@@ -1,0 +1,14 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  module:
+    uses: Vladimir-inc/dungeons-lab-forge/.github/workflows/module-ci.yml@e529db47a58eeae210e00db819dfca8189993fb4
+    with:
+      module-id: pure-evil
+      test-command: npm test
+      forge-ref: e529db47a58eeae210e00db819dfca8189993fb4
+    secrets: inherit
