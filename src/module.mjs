@@ -6,9 +6,11 @@ import { controlTable, invalidateCache, isModuleArmed, knownDice, registerDie, r
 import { installLauncher, refreshLauncher } from "./apps/launcher.mjs";
 import { hubActive, showHubGate } from "./hub-gate.mjs";
 import PureEvilApp from "./apps/pure-evil-app.mjs";
+import { registerDevTools } from "virtual:dungeons-lab/dev-tools";
 import "../styles/module.less";
 
 Hooks.once("init", () => {
+  registerDevTools();
   // No Hub, no module: nothing below installs, so no settings are registered, no roll is
   // touched and no launcher appears. The GM gets told why on ready.
   if (!hubActive()) return;

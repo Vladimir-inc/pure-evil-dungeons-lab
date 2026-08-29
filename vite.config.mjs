@@ -1,17 +1,3 @@
-import { defineConfig } from "vite";
+import { createFoundryModuleConfig, simpleEditions } from "@dungeons-lab/vite-config";
 
-export default defineConfig({
-  build: {
-    lib: {
-      entry: "src/module.mjs",
-      formats: ["es"],
-      fileName: () => "module.mjs",
-    },
-    outDir: "dist",
-    sourcemap: true,
-    minify: false,
-    rollupOptions: {
-      output: { assetFileNames: "styles/module[extname]" },
-    },
-  },
-});
+export default createFoundryModuleConfig({ root: import.meta.url, editions: simpleEditions() });
