@@ -1,14 +1,96 @@
 name: ci
 
+# Self-contained copy of dungeons-lab-forge module-ci.yml @ b169b43.
+# This repo is deliberately PUBLIC for now, and GitHub forbids a public repo
+# from calling a reusable workflow that lives in a private one (the forge).
+# When the repo goes private, replace this file with the one-line caller:
+#   uses: Vladimir-inc/dungeons-lab-forge/.github/workflows/module-ci.yml@<sha>
+# Keep the steps in sync with the forge original until then.
+
 on:
   push:
   pull_request:
 
 jobs:
   module:
-    uses: Vladimir-inc/dungeons-lab-forge/.github/workflows/module-ci.yml@e529db47a58eeae210e00db819dfca8189993fb4
-    with:
-      module-id: pure-evil
-      test-command: npm test
-      forge-ref: e529db47a58eeae210e00db819dfca8189993fb4
-    secrets: inherit
+    runs-on: ubuntu-latest
+    env:
+      MODULE_ID: pure-evil
+      MODULE_ROOT: ${{ github.workspace }}/pure-evil
+      FORGE_ROOT: ${{ github.workspace }}/forge
+      STAGES_ROOT: ${{ github.workspace }}/stages
+    steps:
+      - name: Checkout module
+        uses: actions/checkout@v4
+        with:
+          path: pure-evil
+      - name: Checkout Forge
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/dungeons-lab-forge
+          ref: b169b436949ea000990ad61503a9637811100670
+          path: forge
+          # forge is private; this repo's GITHUB_TOKEN cannot read it.
+          # FORGE_DEPLOY_KEY is a read-only deploy key on the forge repo.
+          ssh-key: ${{ secrets.FORGE_DEPLOY_KEY }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: pure-evil/package-lock.json
+      - name: Install module dependencies
+        working-directory: pure-evil
+        run: npm ci
+      - name: Test module
+        working-directory: pure-evil
+        run: npm test
+      - name: Install Forge dependencies
+        working-directory: forge
+        run: npm ci
+      - name: Pin build timestamp
+        shell: bash
+        run: echo "DL_BUILT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+      - name: Build, stage, and package editions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$STAGES_ROOT"
+          # package free/paid right after their own build: forge package re-stages
+          # from the module's CURRENT dist, so it must run before the next edition's
+          # build overwrites it (test's dist stays last for the deploy step below)
+          for edition in free paid test; do
+            (cd "$MODULE_ROOT" && DL_EDITION="$edition" npm run build)
+            node "$FORGE_ROOT/cli/forge.mjs" stage "$MODULE_ID" --edition "$edition" --out "$STAGES_ROOT/$edition"
+            if [ "$edition" != "test" ]; then
+              (cd "$FORGE_ROOT" && node cli/forge.mjs package "$MODULE_ID" --edition "$edition")
+            fi
+          done
+      - name: Validate identities, files, URLs, sentinel, and edition equivalence
+        run: node "$FORGE_ROOT/ci/validate-module-stages.mjs" "$MODULE_ID" "$MODULE_ROOT" "$STAGES_ROOT"
+      - name: Reject test packaging
+        shell: bash
+        working-directory: forge
+        run: |
+          set -euo pipefail
+          if node cli/forge.mjs package "$MODULE_ID" --edition test; then
+            echo "forge package unexpectedly accepted the test edition" >&2
+            exit 1
+          fi
+      - name: Verify deploy rename-swap and marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          modules_dir="$(mktemp -d)"
+          mkdir -p "$modules_dir/$MODULE_ID"
+          printf stale > "$modules_dir/$MODULE_ID/stale.txt"
+          FOUNDRY_MODULES_DIR="$modules_dir" node "$FORGE_ROOT/cli/forge.mjs" deploy "$MODULE_ID" --edition test --skip-build
+          test ! -e "$modules_dir/$MODULE_ID/stale.txt"
+          node --input-type=module - "$modules_dir/$MODULE_ID" "$MODULE_ID" <<'NODE'
+          import { readFile } from "node:fs/promises";
+          import path from "node:path";
+          const [root, id] = process.argv.slice(2);
+          const manifest = JSON.parse(await readFile(path.join(root, "module.json"), "utf8"));
+          const marker = JSON.parse(await readFile(path.join(root, ".dl-deployed.json"), "utf8"));
+          if (manifest.id !== id || manifest.flags?.dlEdition !== "test") throw new Error("deployed manifest identity mismatch");
+          if (marker.edition !== "test" || marker.version !== manifest.version || marker.link !== false) throw new Error("deploy marker mismatch");
+          NODE
