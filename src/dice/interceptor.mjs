@@ -23,7 +23,7 @@
 import { GM_SUBJECT, MODULE_ID } from "../constants.mjs";
 import { dieKey, enumerateFaces } from "../core/dice-info.mjs";
 import { pickForce, readCharacter, sampleWeighted } from "../core/control-table.mjs";
-import { controlTable, isModuleArmed, noteDie, pending, reportConsume } from "./store.mjs";
+import { controlTable, isModuleArmed, isOperator, noteDie, pending, reportConsume } from "./store.mjs";
 
 const FORCED = Symbol(`${MODULE_ID}.forced`);
 const FACE_CACHE = new Map();
@@ -57,7 +57,7 @@ const KEEP_DROP = /^(kh|kl|dh|dl|k|d)\d*$/i;
  */
 export function subjectIds() {
   const ids = [];
-  if (game.user?.isGM) ids.push(GM_SUBJECT);
+  if (isOperator()) ids.push(GM_SUBJECT);
   const actorId = game.user?.character?.id ?? canvas?.tokens?.controlled?.[0]?.actor?.id;
   if (actorId) ids.push(actorId);
   return ids;
@@ -107,7 +107,7 @@ function decide(term) {
 // Logged on the GM's client only. A player's console must stay clean - the module is worthless
 // the moment it narrates itself to the table.
 function announce(term, key, subjectId, value, how) {
-  if (game.user?.isGM) console.log(`${MODULE_ID} | ${how} ${key} -> ${value} (subject: ${subjectId})`);
+  if (isOperator()) console.log(`${MODULE_ID} | ${how} ${key} -> ${value} (subject: ${subjectId})`);
   return value;
 }
 

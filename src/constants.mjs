@@ -11,6 +11,7 @@ export const SETTINGS = {
   ENABLED: "enabled",
   CHARACTERS: "characters",
   KNOWN_DICE: "knownDice",
+  ASSISTANTS: "assistantsAllowed",
 };
 
 // seeded so the GM has something to configure before anyone has rolled; every other die

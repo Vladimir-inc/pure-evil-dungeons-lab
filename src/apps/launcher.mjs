@@ -1,6 +1,6 @@
 import { L } from "../i18n.mjs";
 import { isArmed, readCharacter } from "../core/control-table.mjs";
-import { controlTable, faceValuesFor } from "../dice/store.mjs";
+import { controlTable, faceValuesFor, isOperator } from "../dice/store.mjs";
 import PureEvilApp from "./pure-evil-app.mjs";
 
 const CLASS = "pe-launcher";
@@ -18,7 +18,7 @@ function anyArmed() {
  * and any popout.
  */
 export function installLauncher(controls) {
-  if (!game.user.isGM) return;
+  if (!isOperator()) return;
   const root = controls ?? document.querySelector("#chat-controls");
   if (!root || root.querySelector(`.${CLASS}`)) return;
 
@@ -36,7 +36,11 @@ export function installLauncher(controls) {
 }
 
 export function refreshLauncher() {
-  if (!game.user?.isGM) return;
+  const buttons = document.querySelectorAll(`.${CLASS}`);
+  if (!isOperator()) {
+    for (const button of buttons) button.remove();
+    return;
+  }
   const armed = anyArmed();
-  for (const button of document.querySelectorAll(`.${CLASS}`)) button.classList.toggle("pe-armed", armed);
+  for (const button of buttons) button.classList.toggle("pe-armed", armed);
 }

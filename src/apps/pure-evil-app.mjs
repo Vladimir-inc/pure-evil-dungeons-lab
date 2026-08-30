@@ -2,7 +2,7 @@ import { GM_SUBJECT, MODULE_ID, SETTINGS, WEIGHT_MAX, WEIGHTS_MAX_FACES } from "
 import { L, LF } from "../i18n.mjs";
 import { dieLabel } from "../core/dice-info.mjs";
 import { isArmed, isFair, readCharacter, weightRows } from "../core/control-table.mjs";
-import { controlTable, faceValuesFor, knownDice, registerDie, updateTable } from "../dice/store.mjs";
+import { controlTable, faceValuesFor, isOperator, knownDice, registerDie, updateTable } from "../dice/store.mjs";
 import { subjectIds } from "../dice/interceptor.mjs";
 import { DISCORD_URL, KOFI_URL, randomPhrase } from "../ui/phrases.mjs";
 
@@ -56,7 +56,7 @@ export default class PureEvilApp extends HandlebarsApplicationMixin(ApplicationV
   /* -------------------------------------------- */
 
   static open() {
-    if (!game.user.isGM) return null;
+    if (!isOperator()) return null;
     const existing = foundry.applications.instances.get(MODULE_ID);
     const app = existing instanceof PureEvilApp ? existing : new PureEvilApp();
     app.render(true);
@@ -65,8 +65,11 @@ export default class PureEvilApp extends HandlebarsApplicationMixin(ApplicationV
 
   /** Re-render whatever is open after any client learns the control table changed. */
   static refresh() {
+    const allowed = isOperator();
     for (const app of foundry.applications.instances.values()) {
-      if (app instanceof PureEvilApp && app.rendered) app.render();
+      if (!(app instanceof PureEvilApp) || !app.rendered) continue;
+      if (allowed) app.render();
+      else app.close();
     }
   }
 
