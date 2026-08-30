@@ -24,4 +24,20 @@ export function registerSettings() {
     type: Object,
     default: {},
   });
+
+  game.settings.register(MODULE_ID, SETTINGS.ASSISTANTS, {
+    name: "PURE_EVIL.Settings.Assistants.Name",
+    hint: "PURE_EVIL.Settings.Assistants.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+  });
+}
+
+/** Hide the access toggle from Assistant GMs, who could otherwise grant it to themselves. */
+export function hideFromAssistants() {
+  if (game.user?.hasRole?.("GAMEMASTER")) return;
+  const setting = game.settings.settings.get(`${MODULE_ID}.${SETTINGS.ASSISTANTS}`);
+  if (setting) setting.config = false;
 }

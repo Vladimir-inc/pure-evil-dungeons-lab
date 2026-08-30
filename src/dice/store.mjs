@@ -12,6 +12,7 @@ import { consumeForce, readCharacter } from "../core/control-table.mjs";
 let tableCache = null;
 let knownCache = null;
 let enabledCache = null;
+let assistantsCache = null;
 
 /** Force charges spent locally that the GM has not written back yet. */
 export const pending = new Map();
@@ -22,11 +23,20 @@ export function invalidateCache(key) {
     pending.clear();
   } else if (key === SETTINGS.KNOWN_DICE) knownCache = null;
   else if (key === SETTINGS.ENABLED) enabledCache = null;
+  else if (key === SETTINGS.ASSISTANTS) assistantsCache = null;
 }
 
 export function isModuleArmed() {
   if (enabledCache === null) enabledCache = game.settings.get(MODULE_ID, SETTINGS.ENABLED) === true;
   return enabledCache;
+}
+
+/** Full GMs always operate the module; Assistant GMs require the explicit world toggle. */
+export function isOperator() {
+  if (!game.user?.isGM) return false;
+  if (game.user?.hasRole?.("GAMEMASTER")) return true;
+  if (assistantsCache === null) assistantsCache = game.settings.get(MODULE_ID, SETTINGS.ASSISTANTS) === true;
+  return assistantsCache;
 }
 
 export function controlTable() {

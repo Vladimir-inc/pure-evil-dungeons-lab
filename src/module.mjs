@@ -1,35 +1,58 @@
 import { GM_SUBJECT, MODULE_ID, SEED_DICE, SETTINGS } from "./constants.mjs";
-import { registerSettings } from "./settings.mjs";
+import { hideFromAssistants, registerSettings } from "./settings.mjs";
 import { dieKey, enumerateFaces } from "./core/dice-info.mjs";
 import { installInterceptor, interceptorStatus, subjectIds } from "./dice/interceptor.mjs";
-import { controlTable, invalidateCache, isModuleArmed, knownDice, registerDie, registerSocket } from "./dice/store.mjs";
+import {
+  controlTable,
+  invalidateCache,
+  isModuleArmed,
+  isOperator,
+  knownDice,
+  registerDie,
+  registerSocket,
+} from "./dice/store.mjs";
 import { installLauncher, refreshLauncher } from "./apps/launcher.mjs";
-import { hubActive, showHubGate } from "./hub-gate.mjs";
+import { createHubGate } from "./hub-gate.mjs";
+import { registerPureEvilWithHub } from "./hub-registration.mjs";
 import PureEvilApp from "./apps/pure-evil-app.mjs";
 import { registerDevTools } from "virtual:dungeons-lab/dev-tools";
 import "../styles/module.less";
 
 Hooks.once("init", () => {
   registerDevTools();
-  // No Hub, no module: nothing below installs, so no settings are registered, no roll is
-  // touched and no launcher appears. The GM gets told why on ready.
-  if (!hubActive()) return;
-
+  // Settings and registration are safe even while blocked. In particular, registering settings
+  // unconditionally prevents other code from tripping over a missing Foundry setting.
   registerSettings();
+  registerPureEvilWithHub();
+  hubGate.start();
+});
+
+Hooks.once("ready", async () => {
+  hideFromAssistants();
+  await hubGate.ready();
+});
+
+const hubGate = createHubGate({
+  arm: armOperationalBehavior,
+  onOperationalReady: startReadyBehavior,
+});
+
+/** Install behavior that must exist before any roll or setting-document update can occur. */
+function armOperationalBehavior() {
   registerSocket();
   // every client patches: the roll is decided on whichever client evaluates it
   installInterceptor();
   game.modules.get(MODULE_ID).api = { debug, open: () => PureEvilApp.open() };
   installHooks();
-});
+}
 
-Hooks.once("ready", async () => {
-  if (!game.user.isGM) return;
-  if (!hubActive()) return showHubGate();
+/** Ready-time behavior is separate so a Hub signal after ready can never hot-activate it. */
+async function startReadyBehavior() {
+  if (!isOperator()) return;
   await pruneCorruptKeys();
   seedKnownDice();
   installLauncher();
-});
+}
 
 /**
  * One-time cleanup of data written before the die-key fix. Die#denomination already contains the
@@ -82,6 +105,7 @@ function installHooks() {
       const [namespace, key] = setting.key.split(".");
       if (namespace !== MODULE_ID) return;
       invalidateCache(key);
+      installLauncher();
       refreshLauncher();
       PureEvilApp.refresh();
     });

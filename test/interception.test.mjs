@@ -27,7 +27,7 @@ describe(`interception against ${FOUNDRY_APP ? "real Foundry" : "the Foundry dic
   let diceConfiguration;
   let uniform;
 
-  function installGlobals({ isGM = true, character = null } = {}) {
+  function installGlobals({ isGM = true, assistant = false, assistantsAllowed = false, character = null } = {}) {
     table = {};
     diceConfiguration = {};
     uniform = Math.random;
@@ -47,13 +47,20 @@ describe(`interception against ${FOUNDRY_APP ? "real Foundry" : "the Foundry dic
     // Foundry installs this in common/primitives; the keep/drop modifiers rely on it
     Math.clamp ??= (n, min, max) => Math.min(max, Math.max(n, min));
     globalThis.game = {
-      user: { isGM, isActiveGM: false, character, hasPermission: () => false },
+      user: {
+        isGM: isGM || assistant,
+        isActiveGM: false,
+        character,
+        hasPermission: () => false,
+        hasRole: (role) => (role === "GAMEMASTER" ? isGM : isGM || assistant),
+      },
       socket: { emit() {}, on() {} },
       settings: {
         get(namespace, key) {
           if (namespace === "core") return diceConfiguration;
           if (key === "enabled") return true;
           if (key === "characters") return table;
+          if (key === "assistantsAllowed") return assistantsAllowed;
           return {};
         },
         set: async () => {},
@@ -197,6 +204,23 @@ describe(`interception against ${FOUNDRY_APP ? "real Foundry" : "the Foundry dic
     uniform = () => 0.999;
 
     expect((await rollTerm(Die, { faces: 20 })).total).toBe(1);
+  });
+
+  it("leaves an Assistant GM's die alone while assistants are shut out", async () => {
+    installGlobals({ isGM: false, assistant: true, assistantsAllowed: false });
+    await loadModule();
+    table.__gm__ = { enabled: true, weights: {}, forces: [{ id: "f1", dieKey: "d20", value: 20, remaining: 5 }] };
+    uniform = () => 0.999;
+
+    expect((await rollTerm(Die, { faces: 20 })).total).toBe(1);
+  });
+
+  it("gives an Assistant GM the GM queue after access is granted", async () => {
+    installGlobals({ isGM: false, assistant: true, assistantsAllowed: true });
+    await loadModule();
+    table.__gm__ = { enabled: true, weights: {}, forces: [{ id: "f1", dieKey: "d20", value: 20, remaining: 5 }] };
+
+    expect((await rollTerm(Die, { faces: 20 })).total).toBe(20);
   });
 
   it("forces a player's die from their assigned character's queue", async () => {

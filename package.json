@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@dungeons-lab/editions": "file:./vendor/dungeons-lab-editions-0.3.0.tgz",
+    "@dungeons-lab/hub-contract": "file:./vendor/dungeons-lab-hub-contract-0.1.0.tgz",
     "@dungeons-lab/vite-config": "file:./vendor/dungeons-lab-vite-config-0.1.0.tgz",
     "less": "^4.2.0",
     "vite": "^5.4.0",
