@@ -1,26 +1,25 @@
-// Integration test against Foundry's REAL dice classes.
+// Integration test against a deterministic Foundry-compatible dice double by default.
 //
 // Everything else in this suite tests our own pure logic, which cannot answer the only question
-// that actually matters: does the method we patch produce the number Foundry uses? This file
-// loads client/dice/terms/*.mjs straight out of the installed Foundry, patches it exactly the way
-// the module does at init, and evaluates real terms.
-//
-// Skips itself when Foundry is not installed at FOUNDRY_APP.
+// that actually matters: does the method we patch produce the number Foundry uses?
+// Set PURE_EVIL_FOUNDRY_APP to an installed Foundry app root to load its real dice classes instead.
 
-import { existsSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { dieKey } from "../src/core/dice-info.mjs";
 
-const FOUNDRY_APP = process.env.FOUNDRY_APP ?? "C:/Program Files/Foundry Virtual Tabletop/resources/app";
-const available = existsSync(`${FOUNDRY_APP}/client/dice/roll.mjs`);
+const FOUNDRY_APP = process.env.PURE_EVIL_FOUNDRY_APP;
+const dice = FOUNDRY_APP
+  ? {
+      Roll: (await import(/* @vite-ignore */ `${FOUNDRY_APP}/client/dice/roll.mjs`)).default,
+      DiceTerm: (await import(/* @vite-ignore */ `${FOUNDRY_APP}/client/dice/terms/dice.mjs`)).default,
+      Die: (await import(/* @vite-ignore */ `${FOUNDRY_APP}/client/dice/terms/die.mjs`)).default,
+      Coin: (await import(/* @vite-ignore */ `${FOUNDRY_APP}/client/dice/terms/coin.mjs`)).default,
+      FateDie: (await import(/* @vite-ignore */ `${FOUNDRY_APP}/client/dice/terms/fate.mjs`)).default,
+    }
+  : await import("./foundry-dice.mjs");
+const { Roll, DiceTerm, Die, Coin, FateDie } = dice;
 
-describe.skipIf(!available)("interception against real Foundry dice", async () => {
-  const Roll = (await import(/* @vite-ignore */ `${FOUNDRY_APP}/client/dice/roll.mjs`)).default;
-  const DiceTerm = (await import(/* @vite-ignore */ `${FOUNDRY_APP}/client/dice/terms/dice.mjs`)).default;
-  const Die = (await import(/* @vite-ignore */ `${FOUNDRY_APP}/client/dice/terms/die.mjs`)).default;
-  const Coin = (await import(/* @vite-ignore */ `${FOUNDRY_APP}/client/dice/terms/coin.mjs`)).default;
-  const FateDie = (await import(/* @vite-ignore */ `${FOUNDRY_APP}/client/dice/terms/fate.mjs`)).default;
-
+describe(`interception against ${FOUNDRY_APP ? "real Foundry" : "the Foundry dice double"}`, () => {
   // the real mersenne handler, copied from CONFIG.Dice.fulfillment in client/config.mjs
   const MERSENNE = { label: "Mersenne", interactive: false, handler: (term) => term.mapRandomFace(Math.random()) };
 

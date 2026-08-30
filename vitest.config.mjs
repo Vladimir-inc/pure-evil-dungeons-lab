@@ -1,23 +1,21 @@
-import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
-// The interception test runs against Foundry's REAL dice classes rather than a lookalike, which
-// is the only way to catch "the method I patched is not the one that produces the result".
-// Foundry's client sources use an @common alias and live outside the project, so both have to be
-// opened up here. Absent (CI, another machine) -> that one test file skips itself.
-const FOUNDRY_APP =
-  process.env.FOUNDRY_APP ?? "C:/Program Files/Foundry Virtual Tabletop/resources/app";
-const hasFoundry = existsSync(`${FOUNDRY_APP}/client/dice/roll.mjs`);
+const installedFoundry = process.env.PURE_EVIL_FOUNDRY_APP;
+// Set PURE_EVIL_FOUNDRY_APP to an installed Foundry app root to run against its real @common.
+const commonRoot = installedFoundry
+  ? path.resolve(installedFoundry, "common")
+  : fileURLToPath(new URL("./test/foundry-common", import.meta.url));
 
 export default defineConfig({
   resolve: {
-    alias: hasFoundry ? { "@common": `${FOUNDRY_APP}/common` } : {},
+    alias: { "@common": commonRoot },
   },
   server: {
-    fs: { strict: false, allow: [".", FOUNDRY_APP] },
+    fs: { strict: false, allow: [".", commonRoot, ...(installedFoundry ? [installedFoundry] : [])] },
   },
   test: {
     environment: "node",
-    provide: { foundryApp: hasFoundry ? FOUNDRY_APP : null },
   },
 });
